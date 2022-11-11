@@ -65,17 +65,31 @@ const props = defineProps({
   postData: {
     type: Object,
     default: {}
+  },
+  fullscreen: {
+    type: Boolean,
+    default: false
+  },
+  options: {
+    type: Object,
+    default: {}
   }
 });
 const emitter = mitt();
 const {setStore, getStore} = useStorage(props.id);
 const adapter =ref(getStore('adapter'));
 
+let options = {}
+for (let key of ['toolbar', 'contextMenu', 'statusbar']) {
+  options[key] = Object.assign({}, props.options[key] || {})
+}
+
 provide('emitter', emitter);
 provide('storage', useStorage(props.id));
 provide('postData', props.postData);
 provide('adapter', adapter);
 provide('maxFileSize', props.maxFileSize);
+provide('options', options)
 
 // Lang Management
 const i18n = useI18n(props.id, props.locale, emitter);
@@ -100,7 +114,7 @@ const loadingState = ref(false);
 
 provide('loadingState', loadingState);
 
-const fullScreen = ref(getStore('full-screen', false));
+const fullScreen = ref(getStore('full-screen', props.fullscreen));
 
 emitter.on('vf-fullscreen-toggle', () => {
   fullScreen.value = !fullScreen.value;

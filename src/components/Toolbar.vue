@@ -1,6 +1,6 @@
 <template>
   <div class="border-neutral-300 flex justify-between items-center py-1 text-sm">
-    <div class="flex text-center" v-if="!searchQuery.length">
+    <div class="flex text-center" v-if="options.toolbar.newFolder !==false && !searchQuery.length">
         <div class="mx-1.5"
              :aria-label="t('New Folder')" data-microtip-position="bottom-right" role="tooltip"
              @click="emitter.emit('vf-modal-show', {type:'new-folder', items: selectedItems})">
@@ -10,7 +10,7 @@
           </svg>
         </div>
 
-        <div class="mx-1.5"
+        <div class="mx-1.5" v-if="options.toolbar.newFile !== false"
              :aria-label="t('New File')" data-microtip-position="bottom" role="tooltip"
              @click="emitter.emit('vf-modal-show', {type:'new-file', items: selectedItems})">
           <svg xmlns="http://www.w3.org/2000/svg"
@@ -19,7 +19,7 @@
           </svg>
         </div>
 
-        <div class="mx-1.5"
+        <div class="mx-1.5" v-if="options.toolbar.rename !== false"
              :aria-label="t('Rename')" data-microtip-position="bottom" role="tooltip"
              @click="(selectedItems.length != 1) || emitter.emit('vf-modal-show', {type:'rename', items: selectedItems})">
           <svg xmlns="http://www.w3.org/2000/svg"
@@ -29,7 +29,7 @@
           </svg>
         </div>
 
-        <div class="mx-1.5"
+        <div class="mx-1.5" v-if="options.toolbar.delete !== false"
              :aria-label="t('Delete')" data-microtip-position="bottom" role="tooltip"
              @click="(!selectedItems.length) || emitter.emit('vf-modal-show', {type:'delete', items: selectedItems})">
             <svg xmlns="http://www.w3.org/2000/svg"
@@ -39,7 +39,7 @@
             </svg>
         </div>
 
-        <div class="mx-1.5"
+        <div class="mx-1.5" v-if="options.toolbar.upload !== false"
              :aria-label="t('Upload')" data-microtip-position="bottom" role="tooltip"
              @click="emitter.emit('vf-modal-show', {type:'upload', items: selectedItems})">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 md:h-8 md:w-8 m-auto cursor-pointer stroke-gray-500 hover:stroke-cyan-700 dark:stroke-gray-400 dark:hover:stroke-gray-300" fill="none" viewBox="0 0 24 24" stroke="none" stroke-width="1.5">
@@ -47,25 +47,26 @@
           </svg>
         </div>
 
-        <div class="mx-1.5" v-if="selectedItems.length == 1 && selectedItems[0].mime_type == 'application/zip'"
-             :aria-label="t('Unrchive')" data-microtip-position="bottom" role="tooltip"
-              @click="(!selectedItems.length) || emitter.emit('vf-modal-show', {type:'unarchive', items: selectedItems})">
-          <svg xmlns="http://www.w3.org/2000/svg"
-               :class="(selectedItems.length) ? 'cursor-pointer stroke-gray-500 hover:stroke-cyan-700 dark:stroke-gray-400 dark:hover:stroke-gray-300' : 'stroke-gray-200  dark:stroke-gray-700'"
-               class="h-6 w-6 md:h-8 md:w-8 m-auto" fill="none" viewBox="0 0 24 24" stroke="none" stroke-width="1.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m6 4.125l2.25 2.25m0 0l2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25 2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-          </svg>
-        </div>
-        <div class="mx-1.5" v-else
-             :aria-label="t('Archive')" data-microtip-position="bottom" role="tooltip"
-              @click="(!selectedItems.length) || emitter.emit('vf-modal-show', {type:'archive', items: selectedItems})">
-          <svg xmlns="http://www.w3.org/2000/svg"
-               :class="(selectedItems.length) ? 'cursor-pointer stroke-gray-500 hover:stroke-cyan-700 dark:stroke-gray-400 dark:hover:stroke-gray-300' : 'stroke-gray-200  dark:stroke-gray-700'"
-               class="h-6 w-6 md:h-8 md:w-8 m-auto" fill="none" viewBox="0 0 24 24" stroke="none" stroke-width="1.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-          </svg>
-        </div>
-
+        <template v-if="options.toolbar.archive !== false">
+          <div class="mx-1.5" v-if="selectedItems.length == 1 && selectedItems[0].mime_type == 'application/zip'"
+               :aria-label="t('Unarchive')" data-microtip-position="bottom" role="tooltip"
+                @click="(!selectedItems.length) || emitter.emit('vf-modal-show', {type:'unarchive', items: selectedItems})">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 :class="(selectedItems.length) ? 'cursor-pointer stroke-gray-500 hover:stroke-cyan-700 dark:stroke-gray-400 dark:hover:stroke-gray-300' : 'stroke-gray-200  dark:stroke-gray-700'"
+                 class="h-6 w-6 md:h-8 md:w-8 m-auto" fill="none" viewBox="0 0 24 24" stroke="none" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m6 4.125l2.25 2.25m0 0l2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25 2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+            </svg>
+          </div>
+          <div class="mx-1.5" v-else
+               :aria-label="t('Archive')" data-microtip-position="bottom" role="tooltip"
+                @click="(!selectedItems.length) || emitter.emit('vf-modal-show', {type:'archive', items: selectedItems})">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 :class="(selectedItems.length) ? 'cursor-pointer stroke-gray-500 hover:stroke-cyan-700 dark:stroke-gray-400 dark:hover:stroke-gray-300' : 'stroke-gray-200  dark:stroke-gray-700'"
+                 class="h-6 w-6 md:h-8 md:w-8 m-auto" fill="none" viewBox="0 0 24 24" stroke="none" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+            </svg>
+          </div>
+        </template>
     </div>
 
     <div class="flex text-center" v-else>
@@ -79,7 +80,7 @@
     </div>
 
     <div class="flex text-center items-center justify-end">
-        <div class="mx-1.5" :aria-label="t('Dark Mode')" data-microtip-position="bottom" role="tooltip">
+        <div class="mx-1.5" :aria-label="t('Dark Mode')" data-microtip-position="bottom" role="tooltip" v-if="options.toolbar.darkMode !== false">
           <svg @click="emitter.emit('vf-darkMode-toggle')" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                class="h-6 w-6 m-auto cursor-pointer stroke-sky-500 fill-sky-100 hover:stroke-sky-600 dark:stroke-gray-400 dark:fill-gray-400/20 dark:hover:stroke-gray-300">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
@@ -87,7 +88,7 @@
         </div>
 
          <div class="mx-1.5" :aria-label="t('Toggle Full Screen')" data-microtip-position="bottom-left" role="tooltip"
-               @click="setFullScreen">
+               @click="setFullScreen" v-if="options.toolbar.fullscreen !== false">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 md:h-8 md:w-8 m-auto cursor-pointer stroke-gray-500 hover:stroke-cyan-700 dark:stroke-gray-400 dark:hover:stroke-gray-300" fill="none" viewBox="0 0 24 24" stroke="none" stroke-width="1.5">
                 <path v-if="fullScreen" stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25" />
                 <path v-else stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
@@ -96,7 +97,7 @@
 
         <div class="mx-1.5"
              :aria-label="t('Change View')" data-microtip-position="bottom-left" role="tooltip"
-             @click="searchQuery.length || emitter.emit('vf-view-toggle', view == 'list' ? 'grid' : 'list')">
+             @click="searchQuery.length || emitter.emit('vf-view-toggle', view == 'list' ? 'grid' : 'list')" v-if="options.toolbar.changeView !== false">
 
           <svg xmlns="http://www.w3.org/2000/svg"
                :class="(!searchQuery.length) ? 'cursor-pointer stroke-gray-500 hover:stroke-cyan-700 dark:stroke-gray-400 dark:hover:stroke-gray-300' : 'stroke-gray-200  dark:stroke-gray-700'"
@@ -142,6 +143,8 @@ emitter.on('vf-search-query', ({newQuery}) => {
 
 const loadingState= inject('loadingState');
 const isLoading = () => loadingState.value;
+
+const options = inject('options')
 
 const setFullScreen = () => {
   fullScreen.value = !fullScreen.value;

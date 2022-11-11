@@ -1,5 +1,6 @@
 <template>
-  <ul class="z-30 absolute text-xs bg-neutral-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-neutral-300 dark:border-gray-600 shadow rounded select-none" ref="contextmenu" v-if="context.active" :style="context.positions">
+  <ul class="z-30 absolute text-xs bg-neutral-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-neutral-300 dark:border-gray-600 shadow rounded select-none"
+      ref="contextmenu" v-if="context.active" :style="context.positions">
     <li class="px-2 py-1.5 cursor-pointer hover:bg-neutral-200 dark:hover:bg-gray-700"
         v-for="(item) in context.items" :key="item.title" @click="run(item)">
       <span class="px-1"></span>
@@ -21,6 +22,8 @@ import {useApiUrl} from '../composables/useApiUrl.js';
 
 const emitter = inject('emitter');
 const contextmenu = ref(null);
+
+const options = inject('options')
 
 const {apiUrl} = useApiUrl();
 
@@ -48,69 +51,85 @@ const menuItems = {
   newfolder: {
     title: () => t('New Folder'),
     action: () => {
-      emitter.emit('vf-modal-show', {type:'new-folder'});
+      emitter.emit('vf-modal-show', {type: 'new-folder'});
     },
   },
   delete: {
     title: () => t('Delete'),
     action: () => {
-      emitter.emit('vf-modal-show', {type:'delete', items: selectedItems});
+      emitter.emit('vf-modal-show', {type: 'delete', items: selectedItems});
     },
   },
   refresh: {
-    title: () =>  t('Refresh'),
+    title: () => t('Refresh'),
     action: () => {
-      emitter.emit('vf-fetch',{params:{q: 'index', adapter: props.current.adapter, path: props.current.dirname}} );
+      emitter.emit('vf-fetch', {params: {q: 'index', adapter: props.current.adapter, path: props.current.dirname}});
     },
   },
   preview: {
-    title: () =>  t('Preview'),
+    title: () => t('Preview'),
     action: () => {
-      emitter.emit('vf-modal-show', {type:'preview', adapter:props.current.adapter, item: selectedItems.value[0]});
+      emitter.emit('vf-modal-show', {type: 'preview', adapter: props.current.adapter, item: selectedItems.value[0]});
     },
   },
   open: {
-    title: () =>  t('Open'),
+    title: () => t('Open'),
     action: () => {
       emitter.emit('vf-search-exit');
-      emitter.emit('vf-fetch', {params:{q: 'index', adapter: props.current.adapter, path:selectedItems.value[0].path}});
+      emitter.emit('vf-fetch', {
+        params: {
+          q: 'index',
+          adapter: props.current.adapter,
+          path: selectedItems.value[0].path
+        }
+      });
     },
   },
   openDir: {
-    title: () =>  t('Open containing folder'),
+    title: () => t('Open containing folder'),
     action: () => {
       emitter.emit('vf-search-exit');
-      emitter.emit('vf-fetch', {params:{q: 'index', adapter: props.current.adapter, path: (selectedItems.value[0].dir)}});
+      emitter.emit('vf-fetch', {
+        params: {
+          q: 'index',
+          adapter: props.current.adapter,
+          path: (selectedItems.value[0].dir)
+        }
+      });
     },
   },
   download: {
-    title: () =>  t('Download'),
+    title: () => t('Download'),
     action: () => {
-      const url = apiUrl.value + '?' + buildURLQuery({q:'download', adapter: props.current.adapter, path: selectedItems.value[0].path});
+      const url = apiUrl.value + '?' + buildURLQuery({
+        q: 'download',
+        adapter: props.current.adapter,
+        path: selectedItems.value[0].path
+      });
       emitter.emit('vf-download', url);
     },
   },
   archive: {
-    title: () =>  t('Archive'),
+    title: () => t('Archive'),
     action: () => {
-      emitter.emit('vf-modal-show', {type:'archive', items: selectedItems});
+      emitter.emit('vf-modal-show', {type: 'archive', items: selectedItems});
     },
   },
   unarchive: {
     title: () => t('Unarchive'),
     action: () => {
-      emitter.emit('vf-modal-show', {type:'unarchive', items: selectedItems});
+      emitter.emit('vf-modal-show', {type: 'unarchive', items: selectedItems});
     },
   },
   rename: {
-    title: () =>  t('Rename'),
+    title: () => t('Rename'),
     action: () => {
-      emitter.emit('vf-modal-show', {type:'rename', items: selectedItems});
+      emitter.emit('vf-modal-show', {type: 'rename', items: selectedItems});
     },
   }
 };
 
-const run = (item) =>{
+const run = (item) => {
   emitter.emit('vf-contextmenu-hide');
   item.action();
 };
@@ -121,43 +140,50 @@ emitter.on('vf-search-query', ({newQuery}) => {
   searchQuery.value = newQuery;
 });
 
-emitter.on('vf-contextmenu-show', ({event, area, items,  target = null}) => {
+emitter.on('vf-contextmenu-show', ({event, area, items, target = null}) => {
   context.items = [];
+
+  const pushItem = (key) => {
+    let optionKey = key === 'unarchive' ? 'archive' : key
+    if (options.contextMenu[optionKey] !== false) {
+      context.items.push(menuItems[key])
+    }
+  }
 
   if (searchQuery.value) {
     if (target) {
-      context.items.push(menuItems.openDir);
+      pushItem('openDir')                  
       emitter.emit('vf-context-selected', [target]);
       // console.log('search item selected');
     } else {
       return;
     }
   } else if (!target && !searchQuery.value) {
-    context.items.push(menuItems.refresh);
-    context.items.push(menuItems.newfolder);
+    pushItem('refresh');
+    pushItem('newfolder');
     emitter.emit('vf-context-selected', []);
     // console.log('no files selected');
   } else if (items.length > 1 && items.some(el => el.path === target.path)) {
-    context.items.push(menuItems.refresh);
-    context.items.push(menuItems.archive);
-    context.items.push(menuItems.delete);
+    pushItem('refresh');
+    pushItem('archive');
+    pushItem('delete');
     emitter.emit('vf-context-selected', items);
     // console.log(items.length + ' selected (more than 1 item.)');
   } else {
     if (target.type == 'dir') {
-      context.items.push(menuItems.open);
+      pushItem('open');
     } else {
-      context.items.push(menuItems.preview);
-      context.items.push(menuItems.download);
+      pushItem('preview');
+      pushItem('download');
     }
-    context.items.push(menuItems.rename);
+    pushItem('rename');
 
     if (target.mime_type == 'application/zip') {
-      context.items.push(menuItems.unarchive);
+      pushItem('unarchive');
     } else {
-      context.items.push(menuItems.archive);
+      pushItem('archive');
     }
-    context.items.push(menuItems.delete);
+    pushItem('delete');
     emitter.emit('vf-context-selected', [target]);
     // console.log(target.type + ' is selected');
   }
