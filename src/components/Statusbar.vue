@@ -28,6 +28,7 @@
         <option value="fr">French</option>
         <option value="ru">Russian</option>
         <option value="tr">Turkish</option>
+        <option value="sk">Slovak</option>
       </select>
 
       <span class="mr-1" :aria-label="t('About')" data-microtip-position="top-left" role="tooltip"
