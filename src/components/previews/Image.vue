@@ -10,7 +10,7 @@
   </div>
 
   <div class="w-full flex justify-center">
-    <img ref="image" class="max-w-[50vh] max-h-[50vh]" :src="getImageUrl(props.selection.adapter, props.selection.item.path)" alt="">
+    <img ref="image" class="max-w-[75vh] max-h-[75vh]" :src="getImageUrl(props.selection.adapter, props.selection.item.path)" alt="">
   </div>
 
   <message v-if="message.length" @hidden="message=''" :error="isError">{{ message }}</message>

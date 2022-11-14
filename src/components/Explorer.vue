@@ -112,6 +112,26 @@
           </div>
       </div>
 
+      <div draggable="true"
+           v-if="view=='gallery' && !searchQuery.length"
+           @dblclick="openItem(item)"
+           @touchstart="delayedOpenItem($event)"
+           @touchend="clearTimeOut()"
+           @contextmenu.prevent="emitter.emit('vf-contextmenu-show', {event: $event, area: selectorArea, items: getSelectedItems(), target: item })"
+           @dragstart="handleDragStart($event,item)"
+           @dragover="handleDragOver($event,item)"
+           @drop="handleDropZone($event,item)"
+           :class="'vf-item-' + randId"
+           class="border border-transparent hover:bg-neutral-50 m-1 dark:hover:bg-gray-700 inline-flex w-[32vw] h-[32vw] text-center justify-center select-none"
+           v-for="(item, index) in getItems(false)" :data-type="item.type" :data-item="JSON.stringify(item)" :data-index="index">
+        <div class="w-[100%]  h-[100%]">
+          <div class="relative w-[100%] h-[100%]">
+            <img class="lazy max-w-[100%] max-h-[100%] m-auto" :data-src="getImageUrl(adapter.value, item.path)"  :alt="item.basename">
+          </div>
+          <span class="break-all">{{ title_shorten(item.basename) }}</span>
+        </div>
+      </div>
+
     </div>
     <v-f-toast />
   </div>
@@ -241,6 +261,10 @@ const getItems = (sorted = true) => {
   let files = [...props.data.files],
       column = sort.column,
       order = sort.order == 'asc' ? 1 : -1;
+
+  if (props.view === 'gallery') {
+    files = files.filter(f => (f.mime_type ?? '').startsWith('image'))
+  }
 
   if (!sorted) {
     return files;

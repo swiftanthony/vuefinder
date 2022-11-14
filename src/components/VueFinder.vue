@@ -46,6 +46,10 @@ const props = defineProps({
     type: String,
     default: 'vf'
   },
+  views: {
+    type: Array,
+    default: ['grid', 'list', 'gallery']
+  },
   dark: {
     type: Boolean,
     default: false
@@ -121,9 +125,10 @@ emitter.on('vf-fullscreen-toggle', () => {
   setStore('full-screen', fullScreen.value);
 });
 
-emitter.on('vf-view-toggle', (newView) => {
-  setStore('viewport', newView)
-  view.value = newView;
+emitter.on('vf-view-toggle', () => {
+  let i = props.views.indexOf(view.value) + 1
+  view.value = props.views[i] || props.views[0]
+  setStore('viewport', view.value)
 })
 
 // Modal Management
