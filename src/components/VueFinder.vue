@@ -6,7 +6,7 @@
           :style="!fullScreen ? 'max-height: ' + maxHeight : ''"
           class="border flex flex-col bg-white dark:bg-gray-800 text-gray-700 dark:text-neutral-400 border-neutral-300 dark:border-gray-900 min-w-min select-none"
           @mousedown="emitter.emit('vf-contextmenu-hide')" @touchstart="emitter.emit('vf-contextmenu-hide')">
-        <v-f-toolbar :data="fetchData" />
+        <v-f-toolbar :view="view" :data="fetchData" />
         <v-f-breadcrumb :data="fetchData"/>
         <v-f-explorer :view="view" :data="fetchData"/>
         <v-f-statusbar :data="fetchData"/>
@@ -122,8 +122,9 @@ emitter.on('vf-fullscreen-toggle', () => {
 });
 
 emitter.on('vf-view-toggle', (newView) => {
+  setStore('viewport', newView)
   view.value = newView;
-});
+})
 
 // Modal Management
 const modal = reactive({

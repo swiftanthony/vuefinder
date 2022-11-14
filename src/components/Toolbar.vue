@@ -125,13 +125,12 @@ const {getStore, setStore} = inject('storage')
 
 const {t} = inject('i18n');
 
-const view = ref(getStore('viewport', 'grid'));
-
 const selectedItems = ref([]);
 
 const fullScreen = ref(getStore('full-screen', false));
 
 const props = defineProps({
+  view: String,
   data: Object
 });
 
@@ -155,8 +154,4 @@ emitter.on('vf-nodes-selected', (items) => {
   selectedItems.value = items;
 })
 
-emitter.on('vf-view-toggle', (newView) => {
-  setStore('viewport', newView)
-  view.value = newView;
-})
 </script>
