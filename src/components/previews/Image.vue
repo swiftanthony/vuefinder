@@ -25,6 +25,7 @@ import ajax from '../../utils/ajax.js';
 import {getImageUrl} from '../../utils/getImageUrl.js';
 import {useApiUrl} from '../../composables/useApiUrl.js';
 import Message from '../Message.vue';
+import buildURLQuery from "../../utils/buildURLQuery.js";
 
 const emit = defineEmits(['load']);
 
@@ -65,7 +66,7 @@ const crop = () => {
           blob => {
             message.value = '';
             isError.value = false;
-            ajax(apiUrl.value, {
+            ajax(apiUrl.value + '?' + buildURLQuery({q: 'upload', adapter: props.selection.adapter, path: props.selection.item.path}), {
               method: 'POST',
               params: Object.assign(postData, {
                 q: 'upload',

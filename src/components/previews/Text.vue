@@ -29,6 +29,7 @@ import {inject, nextTick, onMounted, ref} from 'vue';
 import ajax from '../../utils/ajax.js';
 import {useApiUrl} from '../../composables/useApiUrl.js';
 import Message from '../Message.vue';
+import buildURLQuery from "../../utils/buildURLQuery.js";
 
 const emit = defineEmits(['load'])
 const content = ref('');
@@ -71,7 +72,7 @@ const save = () => {
   message.value = '';
   isError.value = false;
 
-  ajax(apiUrl.value, {
+  ajax(apiUrl.value + '?' + buildURLQuery({q: 'save', adapter: props.selection.adapter, path: props.selection.item.path}), {
     method: 'POST',
     params: Object.assign(postData, {
       q: 'save',
