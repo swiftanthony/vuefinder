@@ -128,7 +128,7 @@ emitter.on('vf-fullscreen-toggle', () => {
 emitter.on('vf-view-toggle', () => {
   let i = props.views.indexOf(view.value) + 1
   view.value = props.views[i] || props.views[0]
-  setStore('viewport', view.value)
+  setStore('viewport', view.value !== 'gallery' ? view.value : props.views[0])
 })
 
 // Modal Management
